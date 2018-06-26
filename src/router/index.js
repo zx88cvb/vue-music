@@ -15,19 +15,19 @@ export default new Router({
     },
     {
       path: '/recommend',
-      complement: Recommend
+      component: Recommend
     },
     {
       path: '/rank',
-      complement: Rank
+      component: Rank
     },
     {
       path: '/search',
-      complement: Search
+      component: Search
     },
     {
       path: '/singer',
-      complement: Singer
+      component: Singer
     }
   ]
 })
