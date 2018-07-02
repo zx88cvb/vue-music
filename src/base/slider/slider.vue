@@ -1,3 +1,4 @@
+import index from "../../router";
 <template>
   <div class="slider" ref="slider">
     <div class="slider-group" ref="sliderGroup">
@@ -5,7 +6,8 @@
       </slot>
     </div>
     <div class="dots">
-      <span></span>
+      <span class="dot" v-for="(item, index) of dots"
+            :key="index" :class="{active : currentPageIndex === index}"></span>
     </div>
   </div>
 </template>
@@ -26,12 +28,23 @@ export default {
     interval: {
       type: Number,
       defalut: 4000
+    },
+    data () {
+      return {
+        dots: [],
+        currentPageIndex: 0
+      }
     }
   },
   mounted () {
     setTimeout(() => {
       this._setSliderWidth()
+      this._initDots()
       this._initSlider()
+
+      if (this.autoPlay) {
+        this._play()
+      }
     }, 20)
   },
   methods: {
@@ -55,6 +68,9 @@ export default {
 
       this.$refs.sliderGroup.style.width = width + 'px'
     },
+    _initDots () {
+      this.dots = new Array(this.children.length)
+    },
     _initSlider () {
       this.slider = new BScroll(this.$refs.slider, {
         scrollX: true,
@@ -66,6 +82,24 @@ export default {
         snapSpeed: 400,
         click: true
       })
+
+      this.slider.on('scrollEnd', () => {
+        let pageIndex = this.slider.getCurrentPage().pageX
+        if (this.loop) {
+          pageIndex -= 1
+        }
+        this.currentPageIndex = pageIndex
+      })
+    },
+    _play () {
+      let pageIndex = this.currentPageIndex + 1
+      if (this.loop) {
+        pageIndex += 1
+      }
+
+      this.timer = setTimeout(() => {
+        this.slider.goToPage(pageIndex, 0, 400)
+      }, this.interval)
     }
   }
 }
