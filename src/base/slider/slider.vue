@@ -1,4 +1,3 @@
-import index from "../../router";
 <template>
   <div class="slider" ref="slider">
     <div class="slider-group" ref="sliderGroup">
@@ -16,6 +15,7 @@ import index from "../../router";
 import BScroll from 'better-scroll'
 import { addClass } from 'common/js/dom'
 export default {
+  name: 'slider',
   props: {
     loop: {
       type: Boolean,
@@ -28,12 +28,12 @@ export default {
     interval: {
       type: Number,
       defalut: 4000
-    },
-    data () {
-      return {
-        dots: [],
-        currentPageIndex: 0
-      }
+    }
+  },
+  data () {
+    return {
+      dots: [],
+      currentPageIndex: 0
     }
   },
   mounted () {
@@ -46,9 +46,20 @@ export default {
         this._play()
       }
     }, 20)
+
+    window.addEventListener('resize', () => {
+      if (!this.slider) {
+        return
+      }
+      this._setSliderWidth(true)
+      this.slider.refresh()
+    })
+  },
+  destroyed () {
+    clearTimeout(this.timer)
   },
   methods: {
-    _setSliderWidth () {
+    _setSliderWidth (isResize) {
       this.children = this.$refs.sliderGroup.children
 
       let width = 0
@@ -62,7 +73,7 @@ export default {
         width += sliderWidth
       }
 
-      if (this.loop) {
+      if (this.loop && !isResize) {
         width += 2 * sliderWidth
       }
 
@@ -79,8 +90,7 @@ export default {
         snap: true,
         snapLoop: this.loop,
         snapThreshold: 0.3,
-        snapSpeed: 400,
-        click: true
+        snapSpeed: 400
       })
 
       this.slider.on('scrollEnd', () => {
@@ -89,6 +99,11 @@ export default {
           pageIndex -= 1
         }
         this.currentPageIndex = pageIndex
+
+        if (this.autoPlay) {
+          clearTimeout(this.timer)
+          this._play()
+        }
       })
     },
     _play () {
