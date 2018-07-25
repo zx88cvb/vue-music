@@ -1,5 +1,11 @@
 <template>
-  <scroll ref="listview" class="listview" :data="data">
+  <scroll ref="listview"
+          class="listview"
+          :data="data"
+          :probeType="probeType"
+          :listenScroll="listenScroll"
+          @scroll="scroll"
+          >
     <ul>
       <li v-for="(group, index) of data" class="list-group" :key="index" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
@@ -15,7 +21,11 @@
       @touchstart="onShortcutTouchStart"
       @touchmove.stop.prevent="onShortcutTouchMove">
       <ul>
-        <li v-for="(item, index) of shortcutList" class="item" :key="index" :data-index="index">
+        <li v-for="(item, index) of shortcutList"
+            class="item" :key="index"
+            :class="{'current': currentIndex === index}"
+            :data-index="index"
+        >
           {{item}}
         </li>
       </ul>
@@ -37,8 +47,17 @@ export default {
       default: []
     }
   },
+  data () {
+    return {
+      scrollY: -1,
+      currentIndex: 0
+    }
+  },
   created () {
     this.touch = {}
+    this.listenScroll = true
+    this.listHeight = []
+    this.probeType = 3
   },
   computed: {
     shortcutList () {
@@ -62,8 +81,50 @@ export default {
       let anchorIndex = parseInt(this.touch.anchorIndex) + delta
       this._scrollTo(anchorIndex)
     },
+    scroll (pos) {
+      this.scrollY = pos.y
+    },
     _scrollTo (index) {
       this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0)
+    },
+    _calculateHeight () {
+      this.listHeight = []
+      const list = this.$refs.listGroup
+      let height = 0
+      this.listHeight.push(height)
+      for (let i = 0; i < list.length; i++) {
+        let item = list[i]
+        height += item.clientHeight
+        this.listHeight.push(height)
+      }
+    }
+  },
+  watch: {
+    data () {
+      setTimeout(() => {
+        this._calculateHeight()
+      }, 20)
+    },
+    scrollY (newY) {
+      const listHeight = this.listHeight
+      // 当滚动到顶部 newY > 0
+      if (newY > 0) {
+        this.currentIndex = 0
+        return
+      }
+
+      // 中间滚动
+      for (let i = 0; i < listHeight.length - 1; i++) {
+        let height1 = listHeight[i]
+        let height2 = listHeight[i + 1]
+        if (-newY >= height1 && -newY < height2) {
+          this.currentIndex = i
+          return
+        }
+      }
+
+      // 当滚动到底部 且 -newY大于最后一个元素的上限
+      this.currentIndex = listHeight.length - 2
     }
   },
   components: {
