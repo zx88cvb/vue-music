@@ -5,8 +5,34 @@
 </template>
 
 <script>
+import {mapGetters} from 'vuex'
+import {ERR_OK} from 'api/config'
+import {getSingerDetail} from 'api/singer'
 export default {
-  name: 'singerDetail'
+  name: 'singerDetail',
+  computed: {
+    ...mapGetters([
+      'singer'
+    ])
+  },
+  created () {
+    this._getDetail()
+  },
+  methods: {
+    _getDetail () {
+      if (!this.singer) {
+        this.$router.push({
+          path: '/singer'
+        })
+        return
+      }
+      getSingerDetail(this.singer.id).then((res) => {
+        if (ERR_OK === res.code) {
+          console.log(res.data.list)
+        }
+      })
+    }
+  }
 }
 </script>
 

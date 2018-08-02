@@ -34,7 +34,7 @@
       <h1 class="fixed-title">{{fixedTitle}}</h1>
     </div>
     <div v-show="!data.length" class="loading-container">
-      <loding></loding>
+      <loading></loading>
     </div>
   </scroll>
 </template>
@@ -48,10 +48,11 @@ const ANCHOR_HEIGHT = 18
 const TITLE_HEIGHT = 30
 
 export default {
+  name: 'listView',
   props: {
     data: {
       type: Array,
-      default: []
+      default: () => []
     }
   },
   data () {
