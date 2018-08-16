@@ -5,11 +5,11 @@
 </template>
 
 <script>
-import {mapGetters} from 'vuex'
 import {ERR_OK} from 'api/config'
 import {getSingerDetail} from 'api/singer'
 import {createSong} from 'common/js/song'
 import MusicList from 'components/music-list/music-list'
+import {mapGetters} from 'vuex'
 export default {
   name: 'singerDetail',
   computed: {
@@ -34,9 +34,7 @@ export default {
   methods: {
     _getDetail () {
       if (!this.singer) {
-        this.$router.push({
-          path: '/singer'
-        })
+        this.$router.push('/singer')
         return
       }
       getSingerDetail(this.singer.id).then((res) => {
@@ -53,7 +51,6 @@ export default {
           ret.push(createSong(musicData))
         }
       })
-      console.log(ret)
       return ret
     }
   },
